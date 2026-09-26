@@ -29,3 +29,8 @@
     height: 20px;
     opacity: 0.8;
 }
+
+/* Hidden by the search widget's search-bookmarks filter. */
+.widget-type-bookmarks [hidden] {
+    display: none;
+}
