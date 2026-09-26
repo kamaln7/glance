@@ -861,6 +861,12 @@ async function setupPage() {
         pageElement.classList.add("content-ready");
         flushContentReadyCallbacks();
 
+        // The browser drops autofocus on elements that are hidden when the page
+        // is parsed, as page content is until now, so apply it here. Whether
+        // there is one at all is decided server-side (see ?newtab).
+        const autofocusElement = pageElement.querySelector("[autofocus]");
+        if (autofocusElement !== null) autofocusElement.focus();
+
         setTimeout(() => {
             document.body.classList.add("page-columns-transitioned");
         }, 300);
