@@ -1,6 +1,6 @@
 import { setupPopovers } from './popover.js';
 import { setupMasonries } from './masonry.js';
-import { throttledDebounce, isElementVisible, openURLInNewTab } from './utils.js';
+import { throttledDebounce, isElementVisible, openURLInNewTab, within } from './utils.js';
 import { elem, find, findAll } from './templating.js';
 
 async function fetchPageContent(pageData) {
@@ -12,8 +12,8 @@ async function fetchPageContent(pageData) {
     return content;
 }
 
-function setupCarousels() {
-    const carouselElements = document.getElementsByClassName("carousel-container");
+function setupCarousels(root = document) {
+    const carouselElements = within(root, ".carousel-container");
 
     if (carouselElements.length == 0) {
         return;
@@ -95,8 +95,8 @@ function updateRelativeTimeForElements(elements)
     }
 }
 
-function setupSearchBoxes() {
-    const searchWidgets = document.getElementsByClassName("search");
+function setupSearchBoxes(root = document) {
+    const searchWidgets = within(root, ".search");
 
     if (searchWidgets.length == 0) {
         return;
@@ -207,8 +207,8 @@ function setupSearchBoxes() {
     }
 }
 
-function setupDynamicRelativeTime() {
-    const elements = document.querySelectorAll("[data-dynamic-relative-time]");
+function setupDynamicRelativeTime(root = document) {
+    const elements = within(root, "[data-dynamic-relative-time]");
     const updateInterval = 60 * 1000;
     let lastUpdateTime = Date.now();
 
@@ -249,8 +249,8 @@ function setupDynamicRelativeTime() {
     });
 }
 
-function setupGroups() {
-    const groups = document.getElementsByClassName("widget-type-group");
+function setupGroups(root = document) {
+    const groups = within(root, ".widget-type-group");
 
     if (groups.length == 0) {
         return;
@@ -309,8 +309,8 @@ function setupGroups() {
     }
 }
 
-function setupLazyImages() {
-    const images = document.querySelectorAll("img[loading=lazy]");
+function setupLazyImages(root = document) {
+    const images = within(root, "img[loading=lazy]");
 
     if (images.length == 0) {
         return;
@@ -384,8 +384,8 @@ function attachExpandToggleButton(collapsibleContainer) {
 };
 
 
-function setupCollapsibleLists() {
-    const collapsibleLists = document.querySelectorAll(".list.collapsible-container");
+function setupCollapsibleLists(root = document) {
+    const collapsibleLists = within(root, ".list.collapsible-container");
 
     if (collapsibleLists.length == 0) {
         return;
@@ -418,8 +418,8 @@ function setupCollapsibleLists() {
     }
 }
 
-function setupCollapsibleGrids() {
-    const collapsibleGridElements = document.querySelectorAll(".cards-grid.collapsible-container");
+function setupCollapsibleGrids(root = document) {
+    const collapsibleGridElements = within(root, ".cards-grid.collapsible-container");
 
     if (collapsibleGridElements.length == 0) {
         return;
@@ -493,10 +493,21 @@ function setupCollapsibleGrids() {
     }
 }
 
-const contentReadyCallbacks = [];
+let contentReadyCallbacks = [];
 
 function afterContentReady(callback) {
     contentReadyCallbacks.push(callback);
+}
+
+// Content becomes ready twice: static widgets with the page, dynamic ones as
+// each arrives. Callbacks run for whatever was set up since the last flush.
+function flushContentReadyCallbacks() {
+    const callbacks = contentReadyCallbacks;
+    contentReadyCallbacks = [];
+
+    for (let i = 0; i < callbacks.length; i++) {
+        callbacks[i]();
+    }
 }
 
 const weekDayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -571,8 +582,8 @@ function zoneDiffText(diffInMinutes) {
     return { text: `${sign}${hours}h~`, title: `${hours} hour${hourSuffix} and ${minutes} minutes ${signText}` };
 }
 
-function setupClocks() {
-    const clocks = document.getElementsByClassName('clock');
+function setupClocks(root = document) {
+    const clocks = within(root, '.clock');
 
     if (clocks.length == 0) {
         return;
@@ -632,8 +643,8 @@ function setupClocks() {
     updateClocks();
 }
 
-async function setupCalendars() {
-    const elems = document.getElementsByClassName("calendar");
+async function setupCalendars(root = document) {
+    const elems = within(root, ".calendar");
     if (elems.length == 0) return;
 
     // TODO: implement prefetching, currently loads as a nasty waterfall of requests
@@ -643,8 +654,8 @@ async function setupCalendars() {
         calendar.default(elems[i]);
 }
 
-async function setupTodos() {
-    const elems = Array.from(document.getElementsByClassName("todo"));
+async function setupTodos(root = document) {
+    const elems = within(root, ".todo");
     if (elems.length == 0) return;
 
     const todo = await import ('./todo.js');
@@ -752,43 +763,62 @@ function initThemePicker() {
     });
 }
 
+async function setupContent(root) {
+    setupPopovers(root);
+    setupClocks(root)
+    await setupCalendars(root);
+    await setupTodos(root);
+    setupCarousels(root);
+    setupSearchBoxes(root);
+    setupCollapsibleLists(root);
+    setupCollapsibleGrids(root);
+    setupGroups(root);
+    setupMasonries(root);
+    setupDynamicRelativeTime(root);
+    setupLazyImages(root);
+}
+
+// Static widgets arrive with the page and are shown straight away. Dynamic ones
+// are placeholders until the page content request returns them.
 async function setupPage() {
     initThemePicker();
 
     const pageElement = document.getElementById("page");
-    const pageContentElement = document.getElementById("page-content");
-    const pageContent = await fetchPageContent(pageData);
-
-    pageContentElement.innerHTML = pageContent;
+    const pageContent = fetchPageContent(pageData);
 
     try {
-        setupPopovers();
-        setupClocks()
-        await setupCalendars();
-        await setupTodos();
-        setupCarousels();
-        setupSearchBoxes();
-        setupCollapsibleLists();
-        setupCollapsibleGrids();
-        setupGroups();
-        setupMasonries();
-        setupDynamicRelativeTime();
-        setupLazyImages();
+        await setupContent(document);
     } finally {
         pageElement.classList.add("content-ready");
-        pageElement.setAttribute("aria-busy", "false");
-
-        for (let i = 0; i < contentReadyCallbacks.length; i++) {
-            contentReadyCallbacks[i]();
-        }
-
-        setTimeout(() => {
-            setupTruncatedElementTitles();
-        }, 50);
+        flushContentReadyCallbacks();
 
         setTimeout(() => {
             document.body.classList.add("page-columns-transitioned");
         }, 300);
+    }
+
+    try {
+        const response = document.createElement("template");
+        response.innerHTML = await pageContent;
+
+        for (const widgetTemplate of response.content.querySelectorAll("template[data-widget-id]")) {
+            const placeholder = document.querySelector(`.widget-placeholder[data-widget-id="${widgetTemplate.dataset.widgetId}"]`);
+            if (placeholder === null) continue;
+
+            const nodes = Array.from(widgetTemplate.content.children);
+            placeholder.replaceWith(...nodes);
+
+            for (const node of nodes) {
+                await setupContent(node);
+            }
+        }
+    } finally {
+        pageElement.setAttribute("aria-busy", "false");
+        flushContentReadyCallbacks();
+
+        setTimeout(() => {
+            setupTruncatedElementTitles();
+        }, 50);
     }
 }
 

@@ -1,8 +1,8 @@
 
-import { clamp } from "./utils.js";
+import { clamp, within } from "./utils.js";
 
-export function setupMasonries() {
-    const masonryContainers = document.getElementsByClassName("masonry");
+export function setupMasonries(root = document) {
+    const masonryContainers = within(root, ".masonry");
 
     for (let i = 0; i < masonryContainers.length; i++) {
         const container = masonryContainers[i];

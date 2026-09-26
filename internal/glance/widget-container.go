@@ -47,6 +47,16 @@ func (widget *containerWidgetBase) _setProviders(providers *widgetProviders) {
 	}
 }
 
+func (widget *containerWidgetBase) _isStatic() bool {
+	for i := range widget.Widgets {
+		if !widget.Widgets[i].IsStatic() {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (widget *containerWidgetBase) _requiresUpdate(now *time.Time) bool {
 	for i := range widget.Widgets {
 		if widget.Widgets[i].requiresUpdate(now) {

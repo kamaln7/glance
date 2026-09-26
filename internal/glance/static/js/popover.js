@@ -1,3 +1,5 @@
+import { within } from "./utils.js";
+
 const defaultShowDelayMs = 200;
 const defaultHideDelayMs = 500;
 const defaultMaxWidth = "300px";
@@ -184,8 +186,8 @@ function handleHidePopoverOnEscape(event) {
     }
 }
 
-export function setupPopovers() {
-    const targets = document.querySelectorAll("[data-popover-type]");
+export function setupPopovers(root = document) {
+    const targets = within(root, "[data-popover-type]");
 
     for (let i = 0; i < targets.length; i++) {
         const target = targets[i];
