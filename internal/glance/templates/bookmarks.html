@@ -16,7 +16,7 @@
                     <img class="bookmarks-icon{{ if .Icon.AutoInvert }} flat-icon{{ end }}" src="{{ .Icon.URL }}" alt="" loading="lazy">
                 </div>
                 {{- end }}
-                <a href="{{ .URL | safeURL }}" class="bookmarks-link {{ if .HideArrow }}bookmarks-link-no-arrow {{ end }}color-highlight size-h4" {{ if .Target }}target="{{ .Target }}"{{ end }} rel="noreferrer">{{ .Title }}</a>
+                <a href="{{ .URL | safeURL }}" class="bookmarks-link {{ if .HideArrow }}bookmarks-link-no-arrow {{ end }}color-highlight size-h4" {{ if $.TargetOverride }}target="{{ $.TargetOverride }}"{{ else if .Target }}target="{{ .Target }}"{{ end }} rel="noreferrer">{{ .Title }}</a>
             </div>
             {{- if .Description }}
             <div class="margin-bottom-5">{{ .Description }}</div>

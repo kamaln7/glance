@@ -23,6 +23,9 @@ type searchWidget struct {
 	Target       string        `yaml:"target"`
 	Autofocus    bool          `yaml:"autofocus"`
 	Placeholder  string        `yaml:"placeholder"`
+
+	NewTabPage       bool          `yaml:"-"`
+	cachedNewTabHTML template.HTML `yaml:"-"`
 }
 
 func convertSearchUrl(url string) string {
@@ -70,7 +73,16 @@ func (widget *searchWidget) initialize() error {
 	}
 
 	widget.cachedHTML = widget.renderTemplate(widget, searchWidgetTemplate)
+
+	widget.NewTabPage = true
+	widget.cachedNewTabHTML = widget.renderTemplate(widget, searchWidgetTemplate)
+	widget.NewTabPage = false
+
 	return nil
+}
+
+func (widget *searchWidget) renderNewTab() template.HTML {
+	return widget.cachedNewTabHTML
 }
 
 func (widget *searchWidget) Render() template.HTML {

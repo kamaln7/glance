@@ -5,7 +5,7 @@
 {{ if .Page.HeadWidgets }}
 <div class="head-widgets">
     {{- range .Page.HeadWidgets }}
-    {{- template "page-widget" . }}
+    {{- template "page-widget" (pageWidget . $.Request) }}
     {{- end }}
 </div>
 {{ end }}
@@ -14,7 +14,7 @@
 {{- range .Page.Columns }}
     <div class="page-column page-column-{{ .Size }}">
         {{- range .Widgets }}
-        {{- template "page-widget" . }}
+        {{- template "page-widget" (pageWidget . $.Request) }}
         {{- end }}
     </div>
 {{- end }}
@@ -23,9 +23,9 @@
 {{/* Static widgets are rendered here, with the page. Dynamic ones get a
 placeholder that page.js fills from the page content request. */}}
 {{ define "page-widget" }}
-{{- if .IsStatic }}
-{{- .Render }}
+{{- if .Widget.IsStatic }}
+{{- renderWidget .Widget .Request }}
 {{- else }}
-<div class="widget widget-placeholder" data-widget-id="{{ .GetID }}"><div class="loading-icon"></div></div>
+<div class="widget widget-placeholder" data-widget-id="{{ .Widget.GetID }}"><div class="loading-icon"></div></div>
 {{- end }}
 {{- end }}
