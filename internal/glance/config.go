@@ -89,6 +89,9 @@ type page struct {
 	} `yaml:"columns"`
 	PrimaryColumnIndex int8       `yaml:"-"`
 	mu                 sync.Mutex `yaml:"-"`
+	// staticMu guards rendering static widgets into the page. It is separate
+	// from mu so the page never waits on a dynamic widget's update.
+	staticMu sync.Mutex `yaml:"-"`
 }
 
 func newConfigFromYAML(contents []byte) (*config, error) {

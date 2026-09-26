@@ -1,0 +1,14 @@
+{{- range .Page.HeadWidgets }}
+{{- template "dynamic-widget" . }}
+{{- end }}
+{{- range .Page.Columns }}
+{{- range .Widgets }}
+{{- template "dynamic-widget" . }}
+{{- end }}
+{{- end }}
+
+{{ define "dynamic-widget" }}
+{{- if not .IsStatic }}
+<template data-widget-id="{{ .GetID }}">{{ .Render }}</template>
+{{- end }}
+{{- end }}

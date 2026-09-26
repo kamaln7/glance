@@ -79,3 +79,12 @@ export function toggleableEvents(element, eventToHandlerMap) {
         }
     ];
 }
+
+// Elements under root matching selector, including root itself. Setup functions
+// take a root so a widget swapped in after the page loaded can be set up on its
+// own, without setting up the rest of the page a second time.
+export function within(root, selector) {
+    const matches = Array.from(root.querySelectorAll(selector));
+    if (root.matches && root.matches(selector)) matches.unshift(root);
+    return matches;
+}

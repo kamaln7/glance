@@ -11,6 +11,12 @@
     display: none;
 }
 
+.widget-placeholder {
+    display: flex;
+    justify-content: center;
+    padding-block: 3rem;
+}
+
 .page.content-ready > .page-content {
     display: block;
     animation: pageContentEntrance .3s cubic-bezier(0.25, 1, 0.5, 1) backwards;
