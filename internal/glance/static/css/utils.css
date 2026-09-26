@@ -253,6 +253,8 @@ details[open] .summary::after {
 [data-newtab] .visited-indicator.text-truncate::before,
 [data-newtab] .bookmarks-link:not(.bookmarks-link-no-arrow)::after {
     content: '→' / "";
+    /* The 0.15em drop above lines up ↗, which sits high; → is already centred. */
+    top: 0;
 }
 
 .visited-indicator.text-truncate {
