@@ -1231,6 +1231,7 @@ Preview:
 | autofocus | boolean | no | false |
 | target | string | no | _blank |
 | placeholder | string | no | Type here to search… |
+| search-bookmarks | boolean | no | false |
 | bangs | array | no | |
 
 ##### `search-engine`
@@ -1250,6 +1251,9 @@ When set to `true`, swaps the shortcuts for showing results in the same or new t
 
 ##### `autofocus`
 When set to `true`, automatically focuses the search input on page load.
+
+##### `search-bookmarks`
+When set to `true`, typing filters the bookmarks widgets on the same page down to the links whose titles match. <kbd>Enter</kbd> opens the best match (an exact match, a title starting with the query, or the only title containing it) instead of searching; <kbd>Shift</kbd> + <kbd>Enter</kbd> always searches. Filtering is off while a bang is active.
 
 ##### `target`
 The target to use when opening the search results in a new tab. Possible values are `_blank`, `_self`, `_parent` and `_top`.

@@ -95,6 +95,54 @@ function updateRelativeTimeForElements(elements)
     }
 }
 
+function normalizeBookmarkQuery(text) {
+    return text.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+// 3: exact title, 2: title starts with the query, 1: contains it, 0: no match.
+function bookmarkMatchScore(title, query) {
+    title = normalizeBookmarkQuery(title);
+    query = normalizeBookmarkQuery(query);
+
+    if (query.length == 0) return 0;
+    if (title == query) return 3;
+    if (title.startsWith(query)) return 2;
+    if (title.includes(query)) return 1;
+    return 0;
+}
+
+function filterBookmarks(query) {
+    const filtering = query.length > 0;
+
+    for (const item of document.querySelectorAll(".widget-type-bookmarks li")) {
+        const link = item.querySelector(".bookmarks-link");
+        item.hidden = filtering && bookmarkMatchScore(link ? link.textContent : "", query) == 0;
+    }
+
+    for (const group of document.querySelectorAll(".widget-type-bookmarks .bookmarks-group")) {
+        group.hidden = filtering && group.querySelector("li:not([hidden])") === null;
+    }
+}
+
+// The bookmark Enter should open: the best prefix or exact match, or the only
+// match. Anything more ambiguous is left to the search engine.
+function bestBookmarkMatch(query) {
+    const matches = [];
+
+    for (const link of document.querySelectorAll(".widget-type-bookmarks .bookmarks-link")) {
+        const score = bookmarkMatchScore(link.textContent, query);
+        if (score > 0) matches.push({ link, score, title: link.textContent.trim() });
+    }
+
+    if (matches.length == 0) return null;
+
+    matches.sort((a, b) => b.score - a.score || a.title.length - b.title.length);
+    const best = matches[0];
+
+    if (best.score >= 2) return best.link;
+    return matches.filter((m) => m.score == best.score).length == 1 ? best.link : null;
+}
+
 function setupSearchBoxes(root = document) {
     const searchWidgets = within(root, ".search");
 
@@ -107,6 +155,7 @@ function setupSearchBoxes(root = document) {
         const defaultSearchUrl = widget.dataset.defaultSearchUrl;
         const target = widget.dataset.target || "_blank";
         const newTab = widget.dataset.newTab === "true";
+        const searchBookmarks = widget.dataset.searchBookmarks !== undefined;
         const inputElement = widget.getElementsByClassName("search-input")[0];
         const bangElement = widget.getElementsByClassName("search-bang")[0];
         const bangs = widget.querySelectorAll(".search-bangs > input");
@@ -128,6 +177,21 @@ function setupSearchBoxes(root = document) {
 
             if (event.key == "Enter") {
                 const input = inputElement.value.trim();
+
+                if (searchBookmarks && currentBang == null && !event.shiftKey) {
+                    const match = bestBookmarkMatch(input);
+
+                    if (match !== null) {
+                        if (newTab && !event.ctrlKey || !newTab && event.ctrlKey) {
+                            window.open(match.href, "_blank").focus();
+                        } else {
+                            window.open(match.href, target == "_top" ? "_top" : "_self");
+                        }
+
+                        return;
+                    }
+                }
+
                 let query;
                 let searchUrlTemplate;
 
@@ -172,18 +236,19 @@ function setupSearchBoxes(root = document) {
 
         const handleInput = (event) => {
             const value = event.target.value.trim();
+            const words = value.split(" ");
+
             if (value in bangsMap) {
                 changeCurrentBang(bangsMap[value]);
-                return;
-            }
-
-            const words = value.split(" ");
-            if (words.length >= 2 && words[0] in bangsMap) {
+            } else if (words.length >= 2 && words[0] in bangsMap) {
                 changeCurrentBang(bangsMap[words[0]]);
-                return;
+            } else {
+                changeCurrentBang(null);
             }
 
-            changeCurrentBang(null);
+            if (searchBookmarks) {
+                filterBookmarks(currentBang == null ? value : "");
+            }
         };
 
         inputElement.addEventListener("focus", () => {
