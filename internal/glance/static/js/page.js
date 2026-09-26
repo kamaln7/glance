@@ -145,7 +145,9 @@ function setupSearchBoxes(root = document) {
                 const url = searchUrlTemplate.replace("!QUERY!", encodeURIComponent(query));
 
                 if (newTab && !event.ctrlKey || !newTab && event.ctrlKey) {
-                    window.open(url, target).focus();
+                    window.open(url, target == "_top" ? "_blank" : target).focus();
+                } else if (target == "_top") {
+                    window.open(url, "_top");
                 } else {
                     window.location.href = url;
                 }
@@ -763,6 +765,8 @@ function initThemePicker() {
     });
 }
 
+const isNewTabPage = new URLSearchParams(window.location.search).has("newtab");
+
 async function setupContent(root) {
     setupPopovers(root);
     setupClocks(root)
@@ -807,6 +811,14 @@ async function setupPage() {
 
             const nodes = Array.from(widgetTemplate.content.children);
             placeholder.replaceWith(...nodes);
+
+            // Dynamic widgets are rendered without the request, so ?newtab is
+            // applied to their links here.
+            if (isNewTabPage) {
+                for (const node of nodes) {
+                    within(node, "a[target=_blank]").forEach((a) => a.target = "_top");
+                }
+            }
 
             for (const node of nodes) {
                 await setupContent(node);

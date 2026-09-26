@@ -32,6 +32,9 @@ type bookmarksWidget struct {
 			Target       string `yaml:"target"`
 		} `yaml:"links"`
 	} `yaml:"groups"`
+
+	TargetOverride   string        `yaml:"-"`
+	cachedNewTabHTML template.HTML `yaml:"-"`
 }
 
 func (widget *bookmarksWidget) initialize() error {
@@ -69,7 +72,15 @@ func (widget *bookmarksWidget) initialize() error {
 
 	widget.cachedHTML = widget.renderTemplate(widget, bookmarksWidgetTemplate)
 
+	widget.TargetOverride = "_top"
+	widget.cachedNewTabHTML = widget.renderTemplate(widget, bookmarksWidgetTemplate)
+	widget.TargetOverride = ""
+
 	return nil
+}
+
+func (widget *bookmarksWidget) renderNewTab() template.HTML {
+	return widget.cachedNewTabHTML
 }
 
 func (widget *bookmarksWidget) Render() template.HTML {

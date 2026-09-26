@@ -34,6 +34,10 @@ var globalTemplateFunctions = template.FuncMap{
 		return intl.Sprintf("%."+strconv.Itoa(precision)+"f", price)
 	},
 	"dynamicRelativeTimeAttrs": dynamicRelativeTimeAttrs,
+	"renderWidget":             renderWidgetForRequest,
+	"pageWidget": func(w widget, r templateRequestData) pageWidget {
+		return pageWidget{Widget: w, Request: r}
+	},
 	"formatServerMegabytes": func(mb uint64) template.HTML {
 		var value string
 		var label string
