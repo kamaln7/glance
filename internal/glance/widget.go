@@ -128,6 +128,7 @@ type widget interface {
 	Render() template.HTML
 	GetType() string
 	GetID() uint64
+	IsStatic() bool
 
 	initialize() error
 	requiresUpdate(*time.Time) bool
@@ -180,6 +181,13 @@ func (w *widgetBase) requiresUpdate(now *time.Time) bool {
 	}
 
 	return now.After(w.nextUpdate)
+}
+
+// IsStatic reports whether the widget never fetches anything after
+// initialization. Static widgets are rendered with the page itself rather than
+// waiting for the page content request.
+func (w *widgetBase) IsStatic() bool {
+	return w.cacheType == cacheTypeInfinite
 }
 
 func (w *widgetBase) IsWIP() bool {

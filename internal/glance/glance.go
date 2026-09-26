@@ -18,8 +18,8 @@ import (
 )
 
 var (
-	pageTemplate        = mustParseTemplate("page.html", "document.html", "footer.html")
-	pageContentTemplate = mustParseTemplate("page-content.html")
+	pageTemplate        = mustParseTemplate("page.html", "document.html", "footer.html", "page-content.html")
+	pageContentTemplate = mustParseTemplate("page-dynamic-widgets.html")
 	manifestTemplate    = mustParseTemplate("manifest.json")
 )
 
@@ -320,8 +320,16 @@ func (a *application) handlePageRequest(w http.ResponseWriter, r *http.Request) 
 	}
 	a.populateTemplateRequestData(&data.Request, r)
 
+	var err error
 	var responseBytes bytes.Buffer
-	err := pageTemplate.Execute(&responseBytes, data)
+
+	func() {
+		page.staticMu.Lock()
+		defer page.staticMu.Unlock()
+
+		err = pageTemplate.Execute(&responseBytes, data)
+	}()
+
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
