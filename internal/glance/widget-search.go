@@ -23,6 +23,9 @@ type searchWidget struct {
 	Target       string        `yaml:"target"`
 	Autofocus    bool          `yaml:"autofocus"`
 	Placeholder  string        `yaml:"placeholder"`
+	// SearchBookmarks filters the page's bookmarks widgets while typing and
+	// opens the best match on Enter.
+	SearchBookmarks bool `yaml:"search-bookmarks"`
 
 	NewTabPage       bool          `yaml:"-"`
 	cachedNewTabHTML template.HTML `yaml:"-"`
