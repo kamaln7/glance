@@ -279,6 +279,10 @@ func (a *application) resolveUserDefinedAssetPath(path string) string {
 
 type templateRequestData struct {
 	Theme *themeProperties
+	// NewTab is set by ?newtab, for a page loaded as a browser's new tab page:
+	// nothing takes focus away from the address bar, and links open in place
+	// of the page rather than in another tab.
+	NewTab bool
 }
 
 type templateData struct {
@@ -301,6 +305,7 @@ func (a *application) populateTemplateRequestData(data *templateRequestData, r *
 	}
 
 	data.Theme = theme
+	data.NewTab = r.URL.Query().Has("newtab")
 }
 
 func (a *application) handlePageRequest(w http.ResponseWriter, r *http.Request) {

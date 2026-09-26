@@ -139,6 +139,29 @@ type widget interface {
 	setHideHeader(bool)
 }
 
+// newTabRenderer is implemented by widgets whose markup differs when the page
+// is loaded with ?newtab.
+type newTabRenderer interface {
+	renderNewTab() template.HTML
+}
+
+// pageWidget pairs a widget with the request it is rendered for, since a
+// template can only pass one value to another.
+type pageWidget struct {
+	Widget  widget
+	Request templateRequestData
+}
+
+func renderWidgetForRequest(w widget, r templateRequestData) template.HTML {
+	if r.NewTab {
+		if n, ok := w.(newTabRenderer); ok {
+			return n.renderNewTab()
+		}
+	}
+
+	return w.Render()
+}
+
 type cacheType int
 
 const (
