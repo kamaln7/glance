@@ -9,6 +9,7 @@
         {{- end }}
         <ul class="list list-gap-2">
         {{- range .Links }}
+        {{- $link := . }}
         <li>
             <div class="flex items-center gap-10">
                 {{- if ne "" .Icon.URL }}
@@ -17,6 +18,15 @@
                 </div>
                 {{- end }}
                 <a href="{{ .URL | safeURL }}" class="bookmarks-link {{ if .HideArrow }}bookmarks-link-no-arrow {{ end }}color-highlight size-h4" {{ if $.TargetOverride }}target="{{ $.TargetOverride }}"{{ else if .Target }}target="{{ .Target }}"{{ end }} rel="noreferrer">{{ .Title }}</a>
+                {{- if .SecondaryLinks }}
+                <div class="bookmarks-secondary flex items-center gap-10 margin-left-auto">
+                    {{- range .SecondaryLinks }}
+                    <a href="{{ .URL | safeURL }}" class="bookmarks-secondary-link" title="{{ .Title }}" aria-label="{{ .Title }}" {{ if $.TargetOverride }}target="{{ $.TargetOverride }}"{{ else if $link.Target }}target="{{ $link.Target }}"{{ end }} rel="noreferrer">
+                        <img class="bookmarks-secondary-icon{{ if .Icon.AutoInvert }} flat-icon{{ end }}" src="{{ .Icon.URL }}" alt="">
+                    </a>
+                    {{- end }}
+                </div>
+                {{- end }}
             </div>
             {{- if .Description }}
             <div class="margin-bottom-5">{{ .Description }}</div>

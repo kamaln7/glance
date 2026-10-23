@@ -1255,7 +1255,7 @@ When set to `true`, swaps the shortcuts for showing results in the same or new t
 When set to `true`, automatically focuses the search input on page load.
 
 ##### `search-bookmarks`
-When set to `true`, typing filters the bookmarks widgets on the same page down to the links whose titles match. <kbd>Enter</kbd> opens the best match (an exact match, a title starting with the query, or the only title containing it) instead of searching; <kbd>Shift</kbd> + <kbd>Enter</kbd> always searches. Filtering is off while a bang is active.
+When set to `true`, typing filters the bookmarks widgets on the same page down to the links whose titles match (a link's secondary links count, by their titles). <kbd>Enter</kbd> opens the best match (an exact match, a title starting with the query, or the only title containing it) instead of searching; <kbd>Shift</kbd> + <kbd>Enter</kbd> always searches. Filtering is off while a bang is active.
 
 ##### `target`
 The target to use when opening the search results in a new tab. Possible values are `_blank`, `_self`, `_parent` and `_top`.
@@ -2637,6 +2637,7 @@ An array of groups which can optionally have a title and a custom color.
 | same-tab | boolean | no | false |
 | hide-arrow | boolean | no | false |
 | target | string | no | |
+| secondary-links | array | no | |
 
 `icon`
 
@@ -2645,6 +2646,19 @@ See [Icons](#icons) for more information on how to specify icons.
 `same-tab`
 
 Whether to open the link in the same tab or a new one.
+
+`secondary-links`
+
+Icon-only links shown on the link's row, right-aligned, for a second page that belongs with it (an app's dashboard next to the app). Each has a `title` (the tooltip and accessible name, and what the search widget's `search-bookmarks` matches), a `url` and a required `icon`. They open the way the link does (`same-tab`, `target`).
+
+```yaml
+- title: Karakeep
+  url: https://karakeep.example.com/
+  secondary-links:
+    - title: Karakeep dashboard
+      url: https://grafana.example.com/d/karakeep
+      icon: si:grafana
+```
 
 `hide-arrow`
 

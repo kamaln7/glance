@@ -30,6 +30,24 @@
     opacity: 0.8;
 }
 
+/* Icon-only links at the end of a link's row (`secondary-links`). */
+.bookmarks-secondary-link {
+    display: flex;
+    flex-shrink: 0;
+    border-radius: var(--border-radius);
+    opacity: 0.5;
+}
+
+.bookmarks-secondary-link:hover,
+.bookmarks-secondary-link:focus-visible {
+    opacity: 1;
+}
+
+.bookmarks-secondary-icon {
+    width: 16px;
+    height: 16px;
+}
+
 /* Hidden by the search widget's search-bookmarks filter. */
 .widget-type-bookmarks [hidden] {
     display: none;

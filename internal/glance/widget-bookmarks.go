@@ -1,6 +1,7 @@
 package glance
 
 import (
+	"fmt"
 	"html/template"
 )
 
@@ -30,6 +31,13 @@ type bookmarksWidget struct {
 			HideArrowRaw *bool  `yaml:"hide-arrow"`
 			HideArrow    bool   `yaml:"-"`
 			Target       string `yaml:"target"`
+			// Icon-only links shown on the link's row, right-aligned. They
+			// open the way the link does (same-tab, target).
+			SecondaryLinks []struct {
+				Title string          `yaml:"title"`
+				URL   string          `yaml:"url"`
+				Icon  customIconField `yaml:"icon"`
+			} `yaml:"secondary-links"`
 		} `yaml:"links"`
 	} `yaml:"groups"`
 
@@ -54,6 +62,12 @@ func (widget *bookmarksWidget) initialize() error {
 				link.HideArrow = group.HideArrow
 			} else {
 				link.HideArrow = *link.HideArrowRaw
+			}
+
+			for _, secondary := range link.SecondaryLinks {
+				if secondary.Icon.URL == "" {
+					return fmt.Errorf("bookmarks: secondary link %q of %q has no icon", secondary.Title, link.Title)
+				}
 			}
 
 			if link.Target == "" {
