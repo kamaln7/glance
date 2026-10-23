@@ -111,12 +111,18 @@ function bookmarkMatchScore(title, query) {
     return 0;
 }
 
+// What a bookmark link is searched by: an icon-only secondary link by its
+// title (its aria-label), any other by its text.
+function bookmarkTitle(link) {
+    return link.getAttribute("aria-label") ?? link.textContent;
+}
+
 function filterBookmarks(query) {
     const filtering = query.length > 0;
 
     for (const item of document.querySelectorAll(".widget-type-bookmarks li")) {
-        const link = item.querySelector(".bookmarks-link");
-        item.hidden = filtering && bookmarkMatchScore(link ? link.textContent : "", query) == 0;
+        const links = item.querySelectorAll(".bookmarks-link, .bookmarks-secondary-link");
+        item.hidden = filtering && !Array.from(links).some((link) => bookmarkMatchScore(bookmarkTitle(link), query) > 0);
     }
 
     for (const group of document.querySelectorAll(".widget-type-bookmarks .bookmarks-group")) {
@@ -129,9 +135,10 @@ function filterBookmarks(query) {
 function bestBookmarkMatch(query) {
     const matches = [];
 
-    for (const link of document.querySelectorAll(".widget-type-bookmarks .bookmarks-link")) {
-        const score = bookmarkMatchScore(link.textContent, query);
-        if (score > 0) matches.push({ link, score, title: link.textContent.trim() });
+    for (const link of document.querySelectorAll(".widget-type-bookmarks .bookmarks-link, .widget-type-bookmarks .bookmarks-secondary-link")) {
+        const title = bookmarkTitle(link).trim();
+        const score = bookmarkMatchScore(title, query);
+        if (score > 0) matches.push({ link, score, title });
     }
 
     if (matches.length == 0) return null;
